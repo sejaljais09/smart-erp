@@ -12,7 +12,9 @@ model User {
   name          String
   email         String    @unique
   passwordHash  String
-
+  
+  currentCompanyId String?
+  
   companies     Company[]
 
   accounts      Account[]

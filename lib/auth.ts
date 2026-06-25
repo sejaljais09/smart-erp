@@ -15,21 +15,6 @@ export const { handlers, signIn, signOut, auth } =
           email: {},
           password: {},
         },
-        callbacks: {
-  async jwt({ token, user }) {
-    if (user) {
-      token.id = user.id;
-    }
-    return token;
-  },
-
-  async session({ session, token }) {
-    if (session.user) {
-      (session.user as any).id = token.id;
-    }
-    return session;
-  },
-},
 
         async authorize(credentials) {
   console.log("========== LOGIN ATTEMPT ==========");
@@ -71,6 +56,21 @@ export const { handlers, signIn, signOut, auth } =
 }
       }),
     ],
+     callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).id = token.id;
+      }
+      return session;
+    },
+  },
 
     pages: {
       signIn: "/login",
