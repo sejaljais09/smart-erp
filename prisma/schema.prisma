@@ -60,7 +60,8 @@ model Company {
   ownerId   String
   owner     User @relation(fields: [ownerId], references: [id])
   ledgers Ledger[]
-  
+  stockItems StockItem[]
+
   createdAt DateTime @default(now())
 }
 
@@ -71,6 +72,25 @@ model Ledger {
   groupName   String
 
   openingBal  Float    @default(0)
+
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model StockItem {
+  id          String   @id @default(cuid())
+
+  name        String
+  sku         String
+
+  unit        String
+
+  gstPercent  Float
+
+  openingQty  Float @default(0)
+  openingRate Float @default(0)
 
   companyId   String
   company     Company @relation(fields: [companyId], references: [id])
