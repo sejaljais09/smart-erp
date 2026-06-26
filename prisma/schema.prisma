@@ -59,6 +59,21 @@ model Company {
 
   ownerId   String
   owner     User @relation(fields: [ownerId], references: [id])
-
+  ledgers Ledger[]
+  
   createdAt DateTime @default(now())
+}
+
+model Ledger {
+  id          String   @id @default(cuid())
+
+  name        String
+  groupName   String
+
+  openingBal  Float    @default(0)
+
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
