@@ -66,6 +66,7 @@ export async function POST(req: Request) {
         gstPercent,
         openingQty,
         openingRate,
+          currentQty: openingQty,
         companyId:
           user.currentCompanyId,
       },

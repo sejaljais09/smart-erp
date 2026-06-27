@@ -61,6 +61,9 @@ model Company {
   owner     User @relation(fields: [ownerId], references: [id])
   ledgers Ledger[]
   stockItems StockItem[]
+  salesVouchers SalesVoucher[]
+  PurchaseVoucher PurchaseVoucher[]
+
 
   createdAt DateTime @default(now())
 }
@@ -91,9 +94,69 @@ model StockItem {
 
   openingQty  Float @default(0)
   openingRate Float @default(0)
+  
+  
+   currentQty   Float @default(0)
 
   companyId   String
   company     Company @relation(fields: [companyId], references: [id])
 
+  purchaseItems PurchaseItem[]
+  
   createdAt   DateTime @default(now())
+}
+
+model SalesVoucher {
+  id          String   @id @default(cuid())
+
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  voucherNo   Int
+  partyName   String
+
+  totalAmount Float
+  items       SalesItem[]
+
+  createdAt   DateTime @default(now())
+}
+
+model PurchaseVoucher {
+  id             String   @id @default(cuid())
+  voucherNo      Int
+  partyName      String
+  totalAmount    Float
+
+  companyId      String
+  company        Company @relation(fields: [companyId], references: [id])
+  
+  items PurchaseItem[]
+
+  createdAt      DateTime @default(now())
+}
+
+model SalesItem {
+  id          String @id @default(cuid())
+
+  voucherId   String
+  voucher     SalesVoucher @relation(fields: [voucherId], references: [id])
+
+  itemName    String
+  qty         Float
+  rate        Float
+  amount      Float
+}
+
+model PurchaseItem {
+  id          String @id @default(cuid())
+
+  voucherId   String
+  voucher     PurchaseVoucher @relation(fields: [voucherId], references: [id])
+
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id])
+
+  qty         Float
+  rate        Float
+  amount      Float
 }
