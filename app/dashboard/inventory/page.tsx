@@ -175,7 +175,7 @@ export default function InventoryPage() {
             </p>
 
             <p>
-              Stock: {item.openingQty}
+              Current Stock: {item.currentQty}
             </p>
 
             <p>
