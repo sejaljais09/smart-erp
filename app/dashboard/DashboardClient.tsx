@@ -41,15 +41,21 @@ export default function DashboardClient() {
         console.log("Ctrl+I pressed");
         router.push("/dashboard/inventory");
       }
+       
        if (e.key === "Escape") {
         e.preventDefault();
         console.log("Escape pressed");
         router.back();
       }
-      if (e.key === "F8") {
-  e.preventDefault();
-  router.push("/dashboard/sales");
-}
+      if (e.ctrlKey && e.key === "c") {
+        e.preventDefault();
+        router.push("/dashboard/customers");
+      }
+     if (e.ctrlKey && e.key === "s") {
+       e.preventDefault();
+      router.push("/dashboard/suppliers");
+     }
+     
     }
 
     window.addEventListener(

@@ -5,4 +5,5 @@ export const shortcuts = [
   { key: "Ctrl+H", path: "/dashboard" },
   { key: "Ctrl+I", path: "/dashboard/inventory" },
   { key: "Alt+L", path: "/dashboard/ledger" },
+  {key:"Ctrl+S", path:"/dashboard/sales"},
 ];

@@ -3,18 +3,16 @@
 import { useEffect, useState } from "react";
 
 export default function SalesPage() {
-  const [partyName, setPartyName] =
-    useState("");
+  
 
-  const [totalAmount, setTotalAmount] =
-    useState("");
-
-  const [vouchers, setVouchers] =
-    useState([]);
+   const [vouchers, setVouchers] = useState([]);
+   const [items, setItems] = useState([]);
+   const [customers, setCustomers] = useState([]);
+   const [customerId, setCustomerId] = useState("");
 
    const [rows, setRows] = useState([
   {
-    itemName: "",
+    stockItemId: "",
     qty: 1,
     rate: 0,
   },
@@ -24,7 +22,7 @@ function addRow() {
   setRows([
     ...rows,
     {
-      itemName: "",
+      stockItemId: "",
       qty: 1,
       rate: 0,
     },
@@ -50,60 +48,83 @@ function updateRow(
     const res = await fetch(
       "/api/sales/list"
     );
-
-    const data = await res.json();
-
-    setVouchers(data);
+     const data = await res.json();
+     setVouchers(data);
   }
+  async function loadItems() {
+  const res = await fetch("/api/inventory/list");
+  const data = await res.json();
+  setItems(data);
+}
 
   async function createVoucher() {
-
-    if (!partyName.trim()) {
-  alert("Party Name is required");
+    if (!customerId) {
+  alert("Party select a customer");
   return;
 }
+    if (
+    rows.some(
+      (row) =>
+        !row.stockItemId ||
+        row.qty <= 0 ||
+        row.rate <= 0
+    )
+  ) {
+    alert("Please fill all item details.");
+    return;
+  }
 
 if (grandTotal <= 0) {
   alert("Total Amount must be greater than 0");
   return;
 }
-    const res = await fetch(
-      "/api/sales",
-      {
+    const res = await fetch( "/api/sales", {
         method: "POST",
         headers: {
           "Content-Type":
             "application/json",
         },
         body: JSON.stringify({
-          partyName,
+          customerId,
           totalAmount:grandTotal,
+          rows,
         }),
       }
     );
 
     const data = await res.json();
-
-    if (data.error) {
+     if (data.error) {
       alert(data.error);
       return;
     }
-
-    setPartyName("");
-    setTotalAmount("");
-
-    loadVouchers();
+    setCustomerId("");
+    setRows([
+  {
+    stockItemId: "",
+    qty: 1,
+    rate: 0,
+  },
+    ]);
+   loadVouchers();
   }
+  
+  async function loadCustomers() {
+  const res = await fetch("/api/customers/list");
+  const data = await res.json();
+  setCustomers(data);
+}
 
   useEffect(() => {
     loadVouchers();
+    loadItems();
+    loadCustomers();
   }, []);
   
-  const grandTotal = rows.reduce(
-  (sum, row) =>
+  const grandTotal = rows.reduce( (sum, row) =>
     sum + Number(row.qty) * Number(row.rate),
   0
-);
+); 
+ 
 
   return (
     <div className="p-10">
@@ -112,14 +133,26 @@ if (grandTotal <= 0) {
       </h1>
 
       <div className="mt-6">
-  <input
-    placeholder="Party Name"
-    className="border p-2 mb-4 w-full"
-    value={partyName}
-    onChange={(e) =>
-      setPartyName(e.target.value)
-    }
-  />
+  <select
+  className="border p-2 mb-4 w-full"
+  value={customerId}
+  onChange={(e) =>
+    setCustomerId(e.target.value)
+  }
+>
+  <option value="">
+    Select Customer
+  </option>
+
+  {customers.map((customer: any) => (
+    <option
+      key={customer.id}
+      value={customer.id}
+    >
+      {customer.name}
+    </option>
+  ))}
+</select>
 
   <table className="w-full border">
     <thead>
@@ -135,17 +168,30 @@ if (grandTotal <= 0) {
       {rows.map((row, index) => (
         <tr key={index}>
           <td>
-            <input
-              className="border p-1 w-full"
-              value={row.itemName}
-              onChange={(e) =>
-                updateRow(
-                  index,
-                  "itemName",
-                  e.target.value
-                )
-              }
-            />
+            <select
+  className="border p-1 w-full"
+  value={row.stockItemId || ""}
+  onChange={(e) =>
+    updateRow(
+      index,
+      "stockItemId",
+      e.target.value
+    )
+  }
+>
+  <option value="">
+    Select Item
+  </option>
+
+  {items.map((item: any) => (
+    <option
+      key={item.id}
+      value={item.id}
+    >
+      {item.name}
+    </option>
+  ))}
+</select>
           </td>
 
           <td>

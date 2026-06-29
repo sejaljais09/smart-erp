@@ -26,18 +26,35 @@ export async function POST(req: Request) {
       );
     }
 
-    const { partyName, totalAmount } =
-      await req.json();
+    const { customerId, totalAmount,rows ,} =  await req.json();
 
-    if (!partyName) {
+    if (!customerId) {
       return NextResponse.json(
-        { error: "Party name required" },
+        { error: "select customer" },
         { status: 400 }
       );
     }
+    if (!rows || rows.length === 0) {
+  return NextResponse.json(
+    { error: "No items added" },
+    { status: 400 }
+  );
+}  
+   const customer = await prisma.customer.findFirst({
+    where: {
+      id: customerId,
+      companyId:dbUser.currentCompanyId,
+    },
+  });
 
-    const lastVoucher =
-      await prisma.salesVoucher.findFirst({
+  if (!customer) {
+  return NextResponse.json(
+    { error: "Customer not found" },
+    { status: 400 }
+  );
+}
+
+    const lastVoucher = await prisma.salesVoucher.findFirst({
         where: {
           companyId:
             dbUser.currentCompanyId,
@@ -47,22 +64,78 @@ export async function POST(req: Request) {
         },
       });
 
-    const voucherNo =
-      (lastVoucher?.voucherNo || 0) + 1;
+    const voucherNo =(lastVoucher?.voucherNo || 0) + 1;
+    
+    for (const row of rows) {
+       const item = await prisma.stockItem.findUnique({
+      where: {
+        id: row.stockItemId,
+      },
+    });
 
+  if (!item) {
+    return NextResponse.json(
+      { error: "Item not found" },
+      { status: 400 }
+    );
+  }
+
+  if (item.currentQty < row.qty) {
+    return NextResponse.json(
+      {
+        error: `${item.name} has only ${item.currentQty} in stock`,
+      },
+      { status: 400 }
+    );
+  }
+}
+
+   const voucher = await prisma.$transaction(
+  async (tx) => {
     const voucher =
-      await prisma.salesVoucher.create({
+      await tx.salesVoucher.create({
         data: {
-          companyId:
-            dbUser.currentCompanyId,
+          companyId: dbUser.currentCompanyId,
           voucherNo,
-          partyName,
+           customerId: customer.id,
+           partyName: customer.name,
           totalAmount:
             Number(totalAmount) || 0,
         },
       });
 
-    return NextResponse.json(voucher);
+    for (const row of rows) {
+      await tx.salesItem.create({
+        data: {
+          voucherId: voucher.id,
+          stockItemId: row.stockItemId,
+          qty: Number(row.qty),
+          rate: Number(row.rate),
+          amount:
+            Number(row.qty) *
+            Number(row.rate),
+        },
+      });
+    }
+
+    for (const row of rows) {
+      await tx.stockItem.update({
+        where: {
+          id: row.stockItemId,
+        },
+        data: {
+          currentQty: {
+            decrement: Number(row.qty),
+          },
+        },
+      });
+    }
+
+    return voucher;
+  }
+);
+
+return NextResponse.json(voucher);
   } catch (error) {
     console.log(error);
 

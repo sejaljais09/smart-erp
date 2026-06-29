@@ -63,7 +63,8 @@ model Company {
   stockItems StockItem[]
   salesVouchers SalesVoucher[]
   PurchaseVoucher PurchaseVoucher[]
-
+  customers Customer[]
+  suppliers Supplier[]
 
   createdAt DateTime @default(now())
 }
@@ -102,7 +103,8 @@ model StockItem {
   company     Company @relation(fields: [companyId], references: [id])
 
   purchaseItems PurchaseItem[]
-  
+  salesItems SalesItem[]
+
   createdAt   DateTime @default(now())
 }
 
@@ -114,7 +116,8 @@ model SalesVoucher {
 
   voucherNo   Int
   partyName   String
-
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
   totalAmount Float
   items       SalesItem[]
 
@@ -125,6 +128,8 @@ model PurchaseVoucher {
   id             String   @id @default(cuid())
   voucherNo      Int
   partyName      String
+   supplierId    String?
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
   totalAmount    Float
 
   companyId      String
@@ -141,7 +146,8 @@ model SalesItem {
   voucherId   String
   voucher     SalesVoucher @relation(fields: [voucherId], references: [id])
 
-  itemName    String
+ stockItemId    String
+  stockItem StockItem @relation(fields: [stockItemId], references: [id])
   qty         Float
   rate        Float
   amount      Float
@@ -159,4 +165,37 @@ model PurchaseItem {
   qty         Float
   rate        Float
   amount      Float
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+
+  name           String
+  phone          String?
+  email          String?
+  gstin          String?
+  address        String?
+
+  openingBalance Float @default(0)
+
+  companyId      String
+  company        Company @relation(fields: [companyId], references: [id])
+  salesVouchers SalesVoucher[]
+  createdAt      DateTime @default(now())
+}
+model Supplier {
+  id             String   @id @default(cuid())
+
+  name           String
+  phone          String?
+  email          String?
+  gstin          String?
+  address        String?
+
+  openingBalance Float @default(0)
+
+  companyId      String
+  company        Company @relation(fields: [companyId], references: [id])
+  purchaseVouchers PurchaseVoucher[]
+  createdAt      DateTime @default(now())
 }
