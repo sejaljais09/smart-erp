@@ -15,6 +15,7 @@ export default function SalesPage() {
     stockItemId: "",
     qty: 1,
     rate: 0,
+    gst:0,
   },
 ]);
 
@@ -25,6 +26,7 @@ function addRow() {
       stockItemId: "",
       qty: 1,
       rate: 0,
+      gst:0,
     },
   ]);
 }
@@ -86,7 +88,7 @@ if (grandTotal <= 0) {
         },
         body: JSON.stringify({
           customerId,
-          totalAmount:grandTotal,
+          totalAmount:invoiceTotal,
           rows,
         }),
       }
@@ -103,11 +105,12 @@ if (grandTotal <= 0) {
     stockItemId: "",
     qty: 1,
     rate: 0,
+    gst:0,
   },
     ]);
    loadVouchers();
   }
-  
+
   async function loadCustomers() {
   const res = await fetch("/api/customers/list");
   const data = await res.json();
@@ -124,7 +127,18 @@ if (grandTotal <= 0) {
     sum + Number(row.qty) * Number(row.rate),
   0
 ); 
- 
+  const taxableAmount = rows.reduce(
+  (sum, row) =>
+    sum + Number(row.qty) * Number(row.rate),
+  0
+);
+
+const gstAmount = rows.reduce(
+  (sum, row) =>
+    sum +(Number(row.qty) * Number(row.rate) * Number(row.gst)) /100, 0
+);
+
+const invoiceTotal =taxableAmount + gstAmount;
 
   return (
     <div className="p-10">
@@ -161,6 +175,7 @@ if (grandTotal <= 0) {
         <th>Qty</th>
         <th>Rate</th>
         <th>Amount</th>
+        <th>GST %</th>
       </tr>
     </thead>
 
@@ -171,13 +186,20 @@ if (grandTotal <= 0) {
             <select
   className="border p-1 w-full"
   value={row.stockItemId || ""}
-  onChange={(e) =>
-    updateRow(
-      index,
-      "stockItemId",
-      e.target.value
-    )
-  }
+  onChange={(e) => {
+  const selected = items.find(
+    (item: any) => item.id === e.target.value
+  );
+
+  const updated = [...rows];
+    updated[index] = {
+    ...updated[index],
+    stockItemId: e.target.value,
+    gst: selected?.gstPercent || 0,
+  };
+
+  setRows(updated);
+}}
 >
   <option value="">
     Select Item
@@ -225,8 +247,9 @@ if (grandTotal <= 0) {
           </td>
 
           <td>
-            {row.qty * row.rate}
+            {(Number(row.qty)*Number(row.rate)*(1+Number(row.gst)/100)).toFixed(2)}
           </td>
+          <td>{row.gst}%</td>
         </tr>
       ))}
     </tbody>
@@ -239,9 +262,24 @@ if (grandTotal <= 0) {
     Add Item
   </button>
 
-  <div className="mt-4 text-xl font-bold">
-    Grand Total: ₹{grandTotal}
+ <div className="mt-6 border rounded p-4 w-80 ml-auto">
+  <div className="flex justify-between">
+    <span>Taxable</span>
+    <span>₹{taxableAmount.toFixed(2)}</span>
   </div>
+
+  <div className="flex justify-between">
+    <span>GST</span>
+    <span>₹{gstAmount.toFixed(2)}</span>
+  </div>
+
+  <hr className="my-2" />
+
+  <div className="flex justify-between font-bold text-lg">
+    <span>Grand Total</span>
+    <span>₹{invoiceTotal.toFixed(2)}</span>
+  </div>
+</div>
 
   <button
     onClick={createVoucher}
@@ -253,9 +291,11 @@ if (grandTotal <= 0) {
 
       <div className="mt-10">
         {vouchers.map((v: any) => (
-          <div
-            key={v.id}
-            className="border p-3 mb-2"
+         <div
+             key={v.id}
+             className="border p-3 mb-2 cursor-pointer hover:bg-gray-100"
+             onClick={() =>
+             window.location.href =`/dashboard/sales/${v.id}`  }
           >
             <h2>
               Voucher #{v.voucherNo}
