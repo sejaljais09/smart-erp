@@ -277,7 +277,10 @@ async function loadTopProducts() {
     )}
   </div>
 
-  <div className="bg-white rounded-2xl shadow-md p-6 mt-8">
+ 
+
+</div>
+      <div className="bg-white rounded-2xl shadow-md p-6 mt-8">
 
   <h2 className="text-2xl font-bold mb-5">
     🔥 Top Selling Products
@@ -311,9 +314,6 @@ async function loadTopProducts() {
   )}
 
 </div>
-
-</div>
-
      
      <div className="bg-white rounded-2xl shadow-md p-6 mt-10">
 
