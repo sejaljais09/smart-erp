@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 export default function SalesPage() {
   
 
-   const [vouchers, setVouchers] = useState([]);
-   const [items, setItems] = useState([]);
-   const [customers, setCustomers] = useState([]);
+   const [vouchers, setVouchers] = useState<any[]>([]);
+   const [items, setItems] = useState<any[]>([]);
+   const [customers, setCustomers] = useState<any[]>([]);
    const [customerId, setCustomerId] = useState("");
 
-   const [rows, setRows] = useState([
+   const [rows, setRows] = useState<Array<{ stockItemId: string; qty: number; rate: number; gst: number }>>([
   {
     stockItemId: "",
     qty: 1,
@@ -195,7 +195,7 @@ const invoiceTotal =taxableAmount + gstAmount;
     updated[index] = {
     ...updated[index],
     stockItemId: e.target.value,
-    gst: selected?.gstPercent || 0,
+    gst: Number(selected?.gstPercent ?? 0),
   };
 
   setRows(updated);

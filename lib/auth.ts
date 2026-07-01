@@ -60,6 +60,7 @@ export const { handlers, signIn, signOut, auth } =
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },
@@ -67,6 +68,7 @@ export const { handlers, signIn, signOut, auth } =
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
+        (session.user as any).email = token.email;
       }
       return session;
     },

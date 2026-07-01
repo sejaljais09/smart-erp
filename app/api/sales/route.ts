@@ -15,11 +15,13 @@ export async function POST(req: Request) {
 
     const dbUser = await prisma.user.findUnique({
       where: {
-        email: session.user.email,
+        email: session.user?.email ?? "",
       },
     });
 
-    if (!dbUser?.currentCompanyId) {
+    const companyId = dbUser?.currentCompanyId;
+
+    if (!companyId) {
       return NextResponse.json(
         { error: "Select company first" },
         { status: 400 }
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
    const customer = await prisma.customer.findFirst({
     where: {
       id: customerId,
-      companyId:dbUser.currentCompanyId,
+      companyId,
     },
   });
 
@@ -56,8 +58,7 @@ export async function POST(req: Request) {
 
     const lastVoucher = await prisma.salesVoucher.findFirst({
         where: {
-          companyId:
-            dbUser.currentCompanyId,
+          companyId,
         },
         orderBy: {
           voucherNo: "desc",
@@ -95,7 +96,7 @@ export async function POST(req: Request) {
     const voucher =
       await tx.salesVoucher.create({
         data: {
-          companyId: dbUser.currentCompanyId,
+          companyId,
           voucherNo,
            customerId: customer.id,
            partyName: customer.name,

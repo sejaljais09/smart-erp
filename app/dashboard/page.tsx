@@ -29,13 +29,17 @@ export default function DashboardPage() {
     items: 0,
   });
 
-  const [overview, setOverview] = useState({
-  recentSales: [],
-  recentPurchases: [],
-  lowStock: [],
-});
-const [monthlySales, setMonthlySales] = useState([]);
-const [topProducts, setTopProducts] = useState([]);
+  const [overview, setOverview] = useState<{
+    recentSales: any[];
+    recentPurchases: any[];
+    lowStock: any[];
+  }>({
+    recentSales: [],
+    recentPurchases: [],
+    lowStock: [],
+  });
+  const [monthlySales, setMonthlySales] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
 
 
   async function loadDashboard() {
@@ -178,10 +182,10 @@ async function loadTopProducts() {
       Recent Sales
     </h2>
 
-    {overview.recentSales.length === 0 ? (
+    {overview.recentSales?.length === 0 ? (
       <p className="text-red-500">No sales yet.</p>
     ) : (
-      overview.recentSales.map((sale: any) => (
+      overview.recentSales?.map((sale: any) => (
         <div
   key={sale.id}
   onClick={() =>
@@ -196,9 +200,7 @@ async function loadTopProducts() {
     {sale.partyName}
   </span>   
           <span className="text-xs text-gray-500">
-    {sale.items
-      .map((i: any) => i.stockItem.name)
-      .join(", ")}
+    {sale.items?.map((i: any) => i.stockItem?.name).join(", ")}
   </span>
    
          <span className="text-black font-semibold">
@@ -217,10 +219,10 @@ async function loadTopProducts() {
       Recent Purchases
     </h2>
 
-    {overview.recentPurchases.length === 0 ? (
+    {overview.recentPurchases?.length === 0 ? (
       <p className="text-red-500">No purchases yet.</p>
     ) : (
-      overview.recentPurchases.map((purchase: any) => (
+      overview.recentPurchases?.map((purchase: any) => (
         <div
   key={purchase.id}
   onClick={() =>
@@ -236,9 +238,7 @@ async function loadTopProducts() {
     {purchase.partyName}
           </span>
            <span className="text-xs text-gray-500">
-    {purchase.items
-      .map((i: any) => i.stockItem.name)
-      .join(", ")}
+    {purchase.items?.map((i: any) => i.stockItem?.name).join(", ")}
   </span>
 
           <span className="text-black font-semibold">
@@ -257,10 +257,10 @@ async function loadTopProducts() {
       Low Stock
     </h2>
 
-    {overview.lowStock.length === 0 ? (
+    {overview.lowStock?.length === 0 ? (
       <p>No low stock items 🎉</p>
     ) : (
-      overview.lowStock.map((item: any) => (
+      overview.lowStock?.map((item: any) => (
         <div
           key={item.id}
           className="flex justify-between border-b py-3"
@@ -286,12 +286,12 @@ async function loadTopProducts() {
     🔥 Top Selling Products
   </h2>
 
-  {topProducts.length === 0 ? (
+  {topProducts?.length === 0 ? (
     <p className="text-gray-500">
       No sales yet.
     </p>
   ) : (
-    topProducts.map((product: any, index) => (
+    topProducts?.map((product: any, index) => (
       <div
         key={index}
         className="flex justify-between items-center border-b py-3 last:border-none"
